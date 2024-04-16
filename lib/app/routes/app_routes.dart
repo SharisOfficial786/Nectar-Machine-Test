@@ -3,10 +3,18 @@ part of 'app_pages.dart';
 
 abstract class Routes {
   Routes._();
-  static const HOME = _Paths.HOME;
+  static const splash = _Paths.splash;
+  static const home = _Paths.home;
+  static const create = _Paths.create;
+  static const pdf = _Paths.pdf;
+  static const video = _Paths.video;
 }
 
 abstract class _Paths {
   _Paths._();
-  static const HOME = '/home';
+  static const splash = '/splash';
+  static const home = '/home';
+  static const create = '/create';
+  static const pdf = '/pdf';
+  static const video = '/video';
 }

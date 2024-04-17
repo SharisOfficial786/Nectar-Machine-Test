@@ -8,6 +8,7 @@ abstract class Routes {
   static const create = _Paths.create;
   static const pdf = _Paths.pdf;
   static const video = _Paths.video;
+  static const image = _Paths.image;
 }
 
 abstract class _Paths {
@@ -17,4 +18,5 @@ abstract class _Paths {
   static const create = '/create';
   static const pdf = '/pdf';
   static const video = '/video';
+  static const image = '/image';
 }

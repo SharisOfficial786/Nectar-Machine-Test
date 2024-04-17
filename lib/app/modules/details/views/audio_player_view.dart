@@ -115,41 +115,46 @@ class _AudioPlayerViewState extends State<AudioPlayerView> {
             IconButton(
               key: const Key('play_button'),
               onPressed: _isPlaying ? null : _play,
-              iconSize: 48.0,
+              iconSize: 27.0,
               icon: const Icon(Icons.play_arrow),
               color: color,
             ),
             IconButton(
               key: const Key('pause_button'),
               onPressed: _isPlaying ? _pause : null,
-              iconSize: 48.0,
+              iconSize: 27.0,
               icon: const Icon(Icons.pause),
               color: color,
             ),
             IconButton(
               key: const Key('stop_button'),
               onPressed: _isPlaying || _isPaused ? _stop : null,
-              iconSize: 48.0,
+              iconSize: 27.0,
               icon: const Icon(Icons.stop),
               color: color,
             ),
           ],
         ),
-        Slider(
-          onChanged: (value) {
-            final duration = _duration;
-            if (duration == null) {
-              return;
-            }
-            final position = value * duration.inMilliseconds;
-            player.seek(Duration(milliseconds: position.round()));
-          },
-          value: (_position != null &&
-                  _duration != null &&
-                  _position!.inMilliseconds > 0 &&
-                  _position!.inMilliseconds < _duration!.inMilliseconds)
-              ? _position!.inMilliseconds / _duration!.inMilliseconds
-              : 0.0,
+        SliderTheme(
+          data: const SliderThemeData(
+            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10),
+          ),
+          child: Slider(
+            onChanged: (value) {
+              final duration = _duration;
+              if (duration == null) {
+                return;
+              }
+              final position = value * duration.inMilliseconds;
+              player.seek(Duration(milliseconds: position.round()));
+            },
+            value: (_position != null &&
+                    _duration != null &&
+                    _position!.inMilliseconds > 0 &&
+                    _position!.inMilliseconds < _duration!.inMilliseconds)
+                ? _position!.inMilliseconds / _duration!.inMilliseconds
+                : 0.0,
+          ),
         ),
         Text(
           _position != null

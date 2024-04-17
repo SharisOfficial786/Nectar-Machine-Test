@@ -5,6 +5,7 @@ class DocumnetModel {
   final String? filePath;
   final DateTime? expiryDate;
   final String? documentType;
+  final String? extensionType;
 
   DocumnetModel({
     this.id,
@@ -13,6 +14,7 @@ class DocumnetModel {
     this.filePath,
     this.expiryDate,
     this.documentType,
+    this.extensionType,
   });
 
   factory DocumnetModel.fromMap(Map<String, dynamic> map) {
@@ -25,6 +27,7 @@ class DocumnetModel {
           ? DateTime.fromMillisecondsSinceEpoch(map['expiryDate'])
           : null,
       documentType: map['documentType'],
+      extensionType: map['extensionType'],
     );
   }
 
@@ -36,6 +39,7 @@ class DocumnetModel {
       "filePath": filePath,
       "expiryDate": expiryDate?.millisecondsSinceEpoch,
       "documentType": documentType,
+      "extensionType": extensionType,
     };
   }
 }

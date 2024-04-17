@@ -56,6 +56,8 @@ class _VideoPlayerViewState extends State<VideoPlayerView> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Details'),
+        centerTitle: true,
+        backgroundColor: Colors.purple.shade100,
       ),
       body: Column(
         children: [

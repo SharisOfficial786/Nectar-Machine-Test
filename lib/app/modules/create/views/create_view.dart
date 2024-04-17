@@ -1,12 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:machine_test_nectar/app/modules/create/controllers/create_controller.dart';
 import 'package:machine_test_nectar/app/modules/create/widgets/file_picked_view.dart';
 import 'package:machine_test_nectar/app/modules/create/widgets/file_picker_view.dart';
-import 'package:machine_test_nectar/app/modules/details/views/audio_recorder_view.dart';
 import 'package:machine_test_nectar/app/widgets/app_textfield.dart';
 
 class CreateView extends GetView<CreateController> {
@@ -17,6 +14,7 @@ class CreateView extends GetView<CreateController> {
       appBar: AppBar(
         title: Text(controller.documentData != null ? 'Update' : 'Create'),
         centerTitle: true,
+        backgroundColor: Colors.purple.shade100,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -40,6 +38,7 @@ class CreateView extends GetView<CreateController> {
               AppTextField(
                 controller: controller.descriptionController,
                 labelText: 'Description',
+                maxLines: 5,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please enter the description';
@@ -110,43 +109,6 @@ class CreateView extends GetView<CreateController> {
           ),
         ),
       ),
-      floatingActionButton: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton(
-            heroTag: 'record',
-            onPressed: () {
-              showRecordPopUp();
-            },
-            child: const Icon(Icons.audio_file),
-          ),
-          const SizedBox(width: 15.0),
-          FloatingActionButton(
-            heroTag: 'video',
-            onPressed: () {
-              controller.accessCamera(
-                  source: MediaType.camera, type: CameraType.video);
-            },
-            child: const Icon(Icons.video_call),
-          ),
-        ],
-      ),
     );
-  }
-
-  void showRecordPopUp() {
-    Get.to(() => const AudioRecorderView())?.then((value) {
-      String path = value as String;
-
-      controller.file.value = File(path);
-    });
-    // Get.dialog(
-    //   Container(
-    //     decoration: BoxDecoration(
-    //       color: Colors.white,
-    //       borderRadius: BorderRadius.circular(20.0),
-    //     ),
-    //   ),
-    // );
   }
 }

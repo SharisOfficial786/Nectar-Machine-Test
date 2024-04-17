@@ -11,6 +11,8 @@ class PdfView extends GetView<DetailsController> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Details'),
+        centerTitle: true,
+        backgroundColor: Colors.purple.shade100,
       ),
       body: PDFView(
         filePath: controller.filePath,

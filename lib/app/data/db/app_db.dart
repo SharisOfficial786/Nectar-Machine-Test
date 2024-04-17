@@ -79,29 +79,16 @@ class DocumentDbHelper {
   Future<CommonMessage> updateDocument(DocumnetModel documnetModel) async {
     final db = await database;
     try {
-      final existingDoc = await db.query(
+      await db.update(
         tableName,
-        where: 'filePath = ? AND title = ?',
-        whereArgs: [documnetModel.filePath, documnetModel.title],
+        documnetModel.toMap(),
+        where: 'id = ?',
+        whereArgs: [documnetModel.id],
       );
-
-      if (existingDoc.isEmpty) {
-        await db.update(
-          tableName,
-          documnetModel.toMap(),
-          where: 'id = ?',
-          whereArgs: [documnetModel.id],
-        );
-        return CommonMessage(
-          isSuccess: true,
-          message: 'Document updated successfully',
-        );
-      } else {
-        return CommonMessage(
-          isSuccess: false,
-          message: 'There is no change in the data',
-        );
-      }
+      return CommonMessage(
+        isSuccess: true,
+        message: 'Document updated successfully',
+      );
     } catch (e) {
       return CommonMessage(isSuccess: false, message: '$e');
     }

@@ -7,9 +7,12 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:machine_test_nectar/app/data/db/app_db.dart';
 import 'package:machine_test_nectar/app/data/models/document_model.dart';
+import 'package:machine_test_nectar/app/modules/create/models/file_selector_model.dart';
 import 'package:machine_test_nectar/app/modules/details/views/audio_player_view.dart';
+import 'package:machine_test_nectar/app/modules/details/views/audio_recorder_view.dart';
 import 'package:machine_test_nectar/app/routes/app_pages.dart';
 import 'package:machine_test_nectar/app/widgets/app_snackbar.dart';
+import 'package:open_file_plus/open_file_plus.dart';
 
 class CreateController extends GetxController with GetTickerProviderStateMixin {
   late AnimationController _animationController;
@@ -32,13 +35,13 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
   String? get filePath => file.value?.path.split('/').last;
 
   final List<String> fileFormats = [
-    'PDF',
-    'Doc',
-    'XLSX',
+    'Document',
     'Video',
     'Audio',
     'Image',
   ];
+
+  List<FileSelectorModel> fileSelectorList = [];
 
   @override
   void onInit() {
@@ -50,6 +53,33 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
 
     _loadEditableData();
 
+    fileSelectorList = [
+      FileSelectorModel(
+        title: 'Photo',
+        icon: 'camera',
+        onTap: () async {
+          accessCamera(isVideo: false);
+        },
+      ),
+      FileSelectorModel(
+        title: 'Video',
+        icon: 'video',
+        onTap: () {
+          accessCamera(isVideo: true);
+        },
+      ),
+      FileSelectorModel(
+        title: 'Audio',
+        icon: 'audio',
+        onTap: () => showRecordPopUp(),
+      ),
+      FileSelectorModel(
+        title: 'Doc',
+        icon: 'document',
+        onTap: () async => await selectFile(),
+      ),
+    ];
+
     super.onInit();
   }
 
@@ -58,8 +88,9 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
     if (documentData != null) {
       titleController.text = documentData?.title ?? '';
       descriptionController.text = documentData?.description ?? '';
-      expiryDateController.text =
-          documentData?.expiryDate.toString().split(' ').first ?? '';
+      expiryDateController.text = documentData?.expiryDate != null
+          ? (documentData?.expiryDate.toString().split(' ').first ?? '')
+          : '';
       fileTypeController.text = documentData?.documentType ?? '';
       file.value = File(documentData?.filePath ?? '');
     }
@@ -73,11 +104,11 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
 
   /// for selecting file
   Future<void> selectFile() async {
+    Get.back();
     FilePickerResult? result = await FilePicker.platform.pickFiles();
 
     if (result != null) {
       file.value = File(result.files.single.path!);
-      print('path -> ${file.value?.path}');
       update();
     }
   }
@@ -93,7 +124,7 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
   Future<void> pickDate(BuildContext context) async {
     final DateTime? pickedDate = await showDatePicker(
       context: context,
-      firstDate: DateTime.now(),
+      firstDate: DateTime(2024),
       lastDate: DateTime(2100),
     );
 
@@ -109,18 +140,14 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
   }
 
   /// for recording video/capture photo from camera / gallery
-  Future<void> accessCamera({
-    required CameraType type,
-    required MediaType source,
-  }) async {
+  Future<void> accessCamera({required isVideo}) async {
+    Get.back();
     XFile? cameraFile;
-    ImageSource imageSource =
-        source == MediaType.camera ? ImageSource.camera : ImageSource.gallery;
 
-    if (type == CameraType.video) {
-      cameraFile = await picker.pickVideo(source: imageSource);
+    if (isVideo) {
+      cameraFile = await picker.pickVideo(source: ImageSource.camera);
     } else {
-      cameraFile = await picker.pickImage(source: imageSource);
+      cameraFile = await picker.pickImage(source: ImageSource.camera);
     }
 
     if (cameraFile != null) {
@@ -128,7 +155,31 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
     }
   }
 
-  /// for selecting audio files
+  /// show the audio recorder
+  void showRecordPopUp() {
+    Get.back();
+    Get.bottomSheet(
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16.0),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0),
+          ),
+        ),
+        child: const AudioRecorderView(),
+      ),
+      isDismissible: false,
+      enableDrag: false,
+    ).then((value) {
+      if (value != null) {
+        String path = value as String;
+        file.value = File(path);
+      }
+    });
+  }
 
   /// insert documnet into db
   Future<void> insertDocumnetToDb() async {
@@ -207,23 +258,43 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
 
   /// view the doc
   void goToDetails() {
-    if (file.value?.path.split('.').last.toLowerCase() == 'mp4') {
+    if (['mp4', 'mkv', 'mov', 'avi', 'webm', 'wmv']
+        .contains(file.value?.path.split('.').last.toLowerCase())) {
       Get.toNamed(
         Routes.video,
         arguments: {
           'filePath': file.value?.path,
         },
       );
-    } else if (['mp3', 'm4a']
+    } else if (['mp3', 'm4a', 'wav', 'ogg']
         .contains(file.value?.path.split('.').last.toLowerCase())) {
       _showAudioPlayerSheet();
-    } else {
+    } else if (['jpeg', 'jpg', 'png', 'gif']
+        .contains(file.value?.path.split('.').last.toLowerCase())) {
+      Get.toNamed(
+        Routes.image,
+        arguments: {
+          'filePath': file.value?.path,
+        },
+      );
+    } else if (file.value?.path.split('.').last.toLowerCase() == 'pdf') {
       Get.toNamed(
         Routes.pdf,
         arguments: {
           'filePath': file.value?.path,
         },
       );
+    } else {
+      openOtherFiles();
+    }
+  }
+
+  /// open other file types
+  Future<void> openOtherFiles() async {
+    final result = await OpenFile.open(file.value?.path);
+
+    if (result.type == ResultType.noAppToOpen) {
+      AppSnackbar.showSnackbar('Error', 'No app installed to open this file');
     }
   }
 
@@ -277,7 +348,3 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
     super.dispose();
   }
 }
-
-enum CameraType { picture, video }
-
-enum MediaType { camera, gallery }

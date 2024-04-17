@@ -7,12 +7,14 @@ class AppTextField extends StatelessWidget {
     required this.labelText,
     this.enabled = true,
     this.validator,
+    this.maxLines = 1,
   });
 
   final TextEditingController controller;
   final String labelText;
   final bool enabled;
   final String? Function(String?)? validator;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +22,8 @@ class AppTextField extends StatelessWidget {
       controller: controller,
       validator: validator,
       enabled: enabled,
+      maxLines: maxLines,
+      minLines: 1,
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,

@@ -1,21 +1,14 @@
 import 'package:get/get.dart';
 import 'package:machine_test_nectar/app/data/db/app_db.dart';
 import 'package:machine_test_nectar/app/data/models/document_model.dart';
-import 'package:machine_test_nectar/app/modules/home/models/filter_model.dart';
 import 'package:machine_test_nectar/app/routes/app_pages.dart';
 
 class HomeController extends GetxController {
-  RxList<FilterModel> fileFormats = <FilterModel>[
-    FilterModel(title: 'All', isSelected: true),
-    FilterModel(title: 'pdf'),
-    FilterModel(title: 'doc'),
-    FilterModel(title: 'xlsx'),
-    FilterModel(title: 'mp4'),
-    FilterModel(title: 'mp3'),
-    FilterModel(title: 'png'),
-  ].obs;
+  final RxInt selectedFileFormatIndex = 0.obs;
 
   final documntList = <DocumnetModel>[].obs;
+
+  final RxBool isLoading = true.obs;
 
   @override
   void onInit() {
@@ -30,24 +23,22 @@ class HomeController extends GetxController {
     final documentDb = DocumentDbHelper();
     final documents = await documentDb.getDocuments();
     documntList.assignAll(documents);
-  }
-
-  /// function for displaying selected filters
-  void filterItems(String filter) {
-    for (var element in fileFormats) {
-      element.isSelected = false;
-      if (element.title == filter) {
-        element.isSelected = true;
-      }
-    }
+    documntList.value = documntList.reversed.toList();
+    isLoading.value = false;
     update();
-    fileFormats.refresh();
   }
 
   void goToCreatePage() {
     Get.toNamed(Routes.create)?.whenComplete(() {
       _loadProductsFromDatabase();
     });
+  }
+
+  bool isDateExpired(int index) {
+    if (documntList[index].expiryDate != null) {
+      return documntList[index].expiryDate!.isBefore(DateTime.now());
+    }
+    return false;
   }
 
   void goToDetailsPage({required DocumnetModel doc}) {

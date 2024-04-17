@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:machine_test_nectar/app/modules/create/bindings/create_binding.dart';
 import 'package:machine_test_nectar/app/modules/create/views/create_view.dart';
 import 'package:machine_test_nectar/app/modules/details/bindings/details_binding.dart';
+import 'package:machine_test_nectar/app/modules/details/views/image_view.dart';
 import 'package:machine_test_nectar/app/modules/details/views/pdf_view.dart';
 import 'package:machine_test_nectar/app/modules/details/views/video_player_view.dart';
 import 'package:machine_test_nectar/app/modules/splash/bindings/splash_binding.dart';
@@ -18,7 +19,7 @@ class AppPages {
   static const initial = Routes.splash;
 
   static final routes = [
-     GetPage(
+    GetPage(
       name: _Paths.splash,
       page: () => const SplashView(),
       binding: SplashBinding(),
@@ -38,9 +39,14 @@ class AppPages {
       page: () => const PdfView(),
       binding: DetailsBinding(),
     ),
-     GetPage(
+    GetPage(
       name: _Paths.video,
       page: () => const VideoPlayerView(),
+      binding: DetailsBinding(),
+    ),
+    GetPage(
+      name: _Paths.image,
+      page: () => const ImageView(),
       binding: DetailsBinding(),
     ),
   ];

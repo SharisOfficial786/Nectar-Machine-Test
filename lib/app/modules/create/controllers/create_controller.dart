@@ -109,6 +109,7 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
 
     if (result != null) {
       file.value = File(result.files.single.path!);
+      fileTypeController.text = file.value?.path.split('.').last ?? '';
       update();
     }
   }
@@ -118,6 +119,7 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
     file.value = null;
     showLinearprogressIndicator.value = true;
     showPadding.value = false;
+    fileTypeController.text = '';
   }
 
   /// for showing date picker
@@ -152,6 +154,7 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
 
     if (cameraFile != null) {
       file.value = File(cameraFile.path);
+      fileTypeController.text = file.value?.path.split('.').last ?? '';
     }
   }
 
@@ -177,12 +180,13 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
       if (value != null) {
         String path = value as String;
         file.value = File(path);
+        fileTypeController.text = file.value?.path.split('.').last ?? '';
       }
     });
   }
 
-  /// insert documnet into db
-  Future<void> insertDocumnetToDb() async {
+  /// insert document into db
+  Future<void> insertDocumentToDb() async {
     try {
       await DocumentDbHelper()
           .insertDocument(
@@ -218,13 +222,13 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
     }
   }
 
-  /// update the db
-  Future<void> updateDocumnetToDb(int id) async {
+  /// update document in the db
+  Future<void> updateDocumentToDb() async {
     try {
       await DocumentDbHelper()
           .updateDocument(
         DocumnetModel(
-          id: id,
+          id: documentData!.id!,
           title: titleController.text,
           description: descriptionController.text,
           filePath: file.value?.path,
@@ -252,6 +256,35 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
       AppSnackbar.showSnackbar(
         'Error',
         'Error in updating document. Please try again later',
+      );
+    }
+  }
+
+  /// delete document from db
+  Future<void> deleteDocumentFromDb() async {
+    try {
+      await DocumentDbHelper()
+          .deleteDocument(
+        documentData!.id!,
+      )
+          .then((value) {
+        if (value.isSuccess) {
+          Get.back();
+          AppSnackbar.showSnackbar(
+            'Success',
+            value.message,
+          );
+        } else {
+          AppSnackbar.showSnackbar(
+            'Failed',
+            value.message,
+          );
+        }
+      });
+    } catch (e) {
+      AppSnackbar.showSnackbar(
+        'Error',
+        'Error in deleting document. Please try again later',
       );
     }
   }
@@ -293,8 +326,12 @@ class CreateController extends GetxController with GetTickerProviderStateMixin {
   Future<void> openOtherFiles() async {
     final result = await OpenFile.open(file.value?.path);
 
-    if (result.type == ResultType.noAppToOpen) {
+    if (result.type == ResultType.done) {
+      return;
+    } else if (result.type == ResultType.noAppToOpen) {
       AppSnackbar.showSnackbar('Error', 'No app installed to open this file');
+    } else {
+      AppSnackbar.showSnackbar('Error', result.message);
     }
   }
 

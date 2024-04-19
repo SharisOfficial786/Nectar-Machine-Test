@@ -8,6 +8,7 @@ import 'package:machine_test_nectar/app/widgets/app_textfield.dart';
 
 class CreateView extends GetView<CreateController> {
   const CreateView({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,6 +54,13 @@ class CreateView extends GetView<CreateController> {
                     : const FilePickerView();
               }),
               const SizedBox(height: 15.0),
+              IgnorePointer(
+                child: AppTextField(
+                  controller: controller.fileTypeController,
+                  labelText: 'Document type',
+                ),
+              ),
+              const SizedBox(height: 15.0),
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
@@ -65,48 +73,97 @@ class CreateView extends GetView<CreateController> {
                   ),
                 ),
               ),
-              const SizedBox(height: 15.0),
-              PopupMenuButton<String>(
-                position: PopupMenuPosition.under,
-                constraints: BoxConstraints(minWidth: Get.width - 32),
-                itemBuilder: (BuildContext context) {
-                  return controller.fileFormats.map((String e) {
-                    return PopupMenuItem<String>(
-                      value: e,
-                      child: Text(e),
-                    );
-                  }).toList();
-                },
-                onSelected: (value) {
-                  controller.selectDocTypeFromDropdown(value);
-                },
-                child: IgnorePointer(
-                  child: AppTextField(
-                    controller: controller.fileTypeController,
-                    labelText: 'Document type',
-                  ),
-                ),
-              ),
               const SizedBox(height: 35.0),
-              ElevatedButton(
-                onPressed: () {
-                  if (controller.formKey.currentState!.validate()) {
-                    if (controller.documentData == null) {
-                      controller.insertDocumnetToDb();
-                    } else {
-                      controller.updateDocumnetToDb(
-                        controller.documentData!.id!,
-                      );
-                    }
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(double.infinity, 43.0),
-                ),
-                child: Text(controller.documentData != null ? 'Save' : 'Add'),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  if (controller.documentData != null) ...[
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () {
+                          showDeleteConfirmation();
+                        },
+                        child: const Text(
+                          'Delete',
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 30.0),
+                  ],
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (controller.formKey.currentState!.validate()) {
+                          if (controller.documentData == null) {
+                            controller.insertDocumentToDb();
+                          } else {
+                            controller.updateDocumentToDb();
+                          }
+                        }
+                      },
+                      child: Text(
+                        controller.documentData != null ? 'Save' : 'Add',
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void showDeleteConfirmation() {
+    Get.bottomSheet(
+      Container(
+        width: Get.width,
+        padding: const EdgeInsets.all(16.0),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20.0),
+            topRight: Radius.circular(20.0),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Delete this item?',
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 15.0),
+            ElevatedButton(
+              onPressed: () {
+                controller.deleteDocumentFromDb();
+                Get.back();
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(Get.width, 45.0),
+              ),
+              child: const Text(
+                'Delete',
+                style: TextStyle(
+                  color: Colors.red,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            OutlinedButton(
+              onPressed: () => Get.back(),
+              style: OutlinedButton.styleFrom(
+                minimumSize: Size(Get.width, 45.0),
+              ),
+              child: const Text('Cancel'),
+            ),
+          ],
         ),
       ),
     );

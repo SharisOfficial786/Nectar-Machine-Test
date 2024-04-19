@@ -6,7 +6,11 @@ import 'package:machine_test_nectar/app/routes/app_pages.dart';
 class HomeController extends GetxController {
   final RxInt selectedFileFormatIndex = 0.obs;
 
-  final documntList = <DocumnetModel>[].obs;
+  final documentList = <DocumnetModel>[].obs;
+  final filteredDocumentList = <DocumnetModel>[].obs;
+
+  final fileFormats = <String>[].obs;
+  final selectedFileFormat = ''.obs;
 
   final RxBool isLoading = true.obs;
 
@@ -22,10 +26,27 @@ class HomeController extends GetxController {
   Future<void> _loadProductsFromDatabase() async {
     final documentDb = DocumentDbHelper();
     final documents = await documentDb.getDocuments();
-    documntList.assignAll(documents);
-    documntList.value = documntList.reversed.toList();
+    final files = await documentDb.getFileFormats();
+    documentList.assignAll(documents);
+    filteredDocumentList.assignAll(documents);
+    documentList.value = documentList.reversed.toList();
+    fileFormats.assignAll(files);
+    selectedFileFormat.value = fileFormats.first;
     isLoading.value = false;
     update();
+  }
+
+  /// Filter documents based on the selected file format
+  Future<void> filterDocuments() async {
+    if (selectedFileFormat.value == "All") {
+      filteredDocumentList.assignAll(documentList);
+    } else {
+      final filteredDocuments = documentList
+          .where(
+              (document) => document.documentType == selectedFileFormat.value)
+          .toList();
+      filteredDocumentList.assignAll(filteredDocuments);
+    }
   }
 
   void goToCreatePage() {
@@ -35,8 +56,8 @@ class HomeController extends GetxController {
   }
 
   bool isDateExpired(int index) {
-    if (documntList[index].expiryDate != null) {
-      return documntList[index].expiryDate!.isBefore(DateTime.now());
+    if (documentList[index].expiryDate != null) {
+      return documentList[index].expiryDate!.isBefore(DateTime.now());
     }
     return false;
   }

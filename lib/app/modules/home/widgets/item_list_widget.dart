@@ -10,13 +10,13 @@ class ItemListWidget extends GetView<HomeController> {
     return Obx(() {
       return ListView.separated(
         padding: const EdgeInsets.all(16.0),
-        itemCount: controller.documntList.length,
+        itemCount: controller.filteredDocumentList.length,
         itemBuilder: (context, index) {
           return GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () {
               controller.goToDetailsPage(
-                doc: controller.documntList[index],
+                doc: controller.filteredDocumentList[index],
               );
             },
             child: Container(
@@ -35,7 +35,7 @@ class ItemListWidget extends GetView<HomeController> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        controller.documntList[index].title ?? '',
+                        controller.filteredDocumentList[index].title ?? '',
                         style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.w600,
@@ -44,10 +44,10 @@ class ItemListWidget extends GetView<HomeController> {
                               : null,
                         ),
                       ),
-                      if (controller.documntList[index].expiryDate != null) ...[
+                      if (controller.filteredDocumentList[index].expiryDate != null) ...[
                         const SizedBox(height: 5.0),
                         Text(
-                          controller.documntList[index].expiryDate
+                          controller.filteredDocumentList[index].expiryDate
                               .toString()
                               .split(' ')
                               .first,
@@ -61,7 +61,7 @@ class ItemListWidget extends GetView<HomeController> {
                     ],
                   ),
                   Text(
-                    controller.documntList[index].filePath
+                    controller.filteredDocumentList[index].filePath
                         .toString()
                         .split('.')
                         .last,

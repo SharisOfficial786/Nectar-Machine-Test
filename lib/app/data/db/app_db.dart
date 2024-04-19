@@ -45,19 +45,19 @@ class DocumentDbHelper {
   }
 
   /// inserting into database
-  Future<CommonMessage> insertDocument(DocumnetModel documnetModel) async {
+  Future<CommonMessage> insertDocument(DocumnetModel documentModel) async {
     final db = await database;
     try {
       final existingDoc = await db.query(
         tableName,
         where: 'filePath = ? AND title = ?',
-        whereArgs: [documnetModel.filePath, documnetModel.title],
+        whereArgs: [documentModel.filePath, documentModel.title],
       );
 
       if (existingDoc.isEmpty) {
         await db.insert(
           tableName,
-          documnetModel.toMap(),
+          documentModel.toMap(),
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
         return CommonMessage(
@@ -76,14 +76,14 @@ class DocumentDbHelper {
   }
 
   /// updating item in database
-  Future<CommonMessage> updateDocument(DocumnetModel documnetModel) async {
+  Future<CommonMessage> updateDocument(DocumnetModel documentModel) async {
     final db = await database;
     try {
       await db.update(
         tableName,
-        documnetModel.toMap(),
+        documentModel.toMap(),
         where: 'id = ?',
-        whereArgs: [documnetModel.id],
+        whereArgs: [documentModel.id],
       );
       return CommonMessage(
         isSuccess: true,
@@ -94,6 +94,22 @@ class DocumentDbHelper {
     }
   }
 
+  /// getting fileFormat list form database
+  Future<List<String>> getFileFormats() async {
+    final db = await database;
+    final List<Map<String, dynamic>> dataMaps = await db.query(
+      tableName,
+      columns: ['documentType'],
+      distinct: true,
+    );
+    final List<String> documentTypes =
+        dataMaps.map((map) => map['documentType'] as String).toList();
+
+    documentTypes.insert(0, 'All');
+
+    return documentTypes.where((type) => type.isNotEmpty).toList();
+  }
+
   /// getting list from database
   Future<List<DocumnetModel>> getDocuments() async {
     final db = await database;
@@ -101,6 +117,24 @@ class DocumentDbHelper {
     return List.generate(dataMaps.length, (index) {
       return DocumnetModel.fromMap(dataMaps[index]);
     });
+  }
+
+  /// deleting item from database
+  Future<CommonMessage> deleteDocument(int id) async {
+    final db = await database;
+    try {
+      await db.delete(
+        tableName,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      return CommonMessage(
+        isSuccess: true,
+        message: 'Document deleted successfully',
+      );
+    } catch (e) {
+      return CommonMessage(isSuccess: false, message: '$e');
+    }
   }
 }
 
